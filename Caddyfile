@@ -1,0 +1,28 @@
+# Railway provides a dynamic PORT env var; listen on that port.
+:{$PORT}
+
+# Simple health endpoint for uptime/readiness checks.
+respond /health "ok" 200
+
+# Match allowed browser origins for CORS.
+@allowed_origin header_regexp Origin ^https://campaign-center-admin-web\.vercel\.app$|^http://localhost:3000$
+
+# Handle API gateway traffic for campaign-center-api.
+# Using `handle` (not `handle_path`) keeps the full path prefix when proxying.
+handle /campaign-center-api/* {
+# CORS response headers for allowed origins.
+header @allowed_origin Access-Control-Allow-Origin "{http.request.header.Origin}"
+header @allowed_origin Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+header @allowed_origin Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+header @allowed_origin Vary "Origin"
+
+# Properly answer CORS preflight requests.
+@preflight method OPTIONS
+respond @preflight "" 204
+
+# Reverse proxy to the internal Railway service, preserving request path.
+reverse_proxy http://campaign-center-api.railway.internal:8080
+}
+
+# Return 404 for non-matching routes.
+respond "not found" 404
