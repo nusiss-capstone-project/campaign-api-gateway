@@ -32,7 +32,16 @@ route {
 	# Using `handle` (not `handle_path`) keeps the full path prefix when proxying.
 	handle @api_path {
 		# Reverse proxy to the internal Railway service, preserving request path.
-		reverse_proxy http://campaign-center-api.railway.internal:8080
+		reverse_proxy http://campaign-center-api.railway.internal:8080 {
+			# The gateway owns CORS; strip upstream CORS headers to avoid browser-rejected duplicates.
+			header_down -Access-Control-Allow-Origin
+			header_down -Access-Control-Allow-Methods
+			header_down -Access-Control-Allow-Headers
+			header_down -Access-Control-Allow-Credentials
+			header_down -Access-Control-Expose-Headers
+			header_down -Access-Control-Max-Age
+			header_down -Vary
+		}
 	}
 
 	# Return 404 for non-matching routes.
