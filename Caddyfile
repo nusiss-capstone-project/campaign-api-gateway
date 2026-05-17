@@ -6,13 +6,11 @@
 
 # Match allowed browser origins for CORS.
 @allowed_origin {
-	path /campaign-center-api /campaign-center-api/*
 	expression `{http.request.header.Origin} == "https://campaign-center-admin-web.vercel.app" || {http.request.header.Origin} == "http://localhost:3000"`
 }
 
 # Properly answer CORS preflight requests from allowed origins.
 @preflight {
-	path /campaign-center-api /campaign-center-api/*
 	method OPTIONS
 	expression `{http.request.header.Origin} == "https://campaign-center-admin-web.vercel.app" || {http.request.header.Origin} == "http://localhost:3000"`
 }
@@ -24,7 +22,8 @@ route {
 	# CORS response headers for allowed origins.
 	header @allowed_origin Access-Control-Allow-Origin "{http.request.header.Origin}"
 	header @allowed_origin Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
-	header @allowed_origin Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+	header @allowed_origin Access-Control-Allow-Headers "{http.request.header.Access-Control-Request-Headers}"
+	header @allowed_origin Access-Control-Allow-Credentials "true"
 	header @allowed_origin Vary "Origin"
 
 	respond @preflight "" 204
