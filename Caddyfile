@@ -6,13 +6,13 @@
 
 # Match allowed browser origins for CORS.
 @allowed_origin {
-	expression `{http.request.header.Origin} == "https://campaign-center-admin-web.vercel.app" || {http.request.header.Origin} == "http://localhost:3000"`
+	expression `{http.request.header.Origin} == "https://campaign-center-admin-web.vercel.app" || {http.request.header.Origin} == "https://finverse-web.vercel.app" || {http.request.header.Origin} == "http://localhost:3000"`
 }
 
 # Properly answer CORS preflight requests from allowed origins.
 @preflight {
 	method OPTIONS
-	expression `{http.request.header.Origin} == "https://campaign-center-admin-web.vercel.app" || {http.request.header.Origin} == "http://localhost:3000"`
+	expression `{http.request.header.Origin} == "https://campaign-center-admin-web.vercel.app" || {http.request.header.Origin} == "https://finverse-web.vercel.app" || {http.request.header.Origin} == "http://localhost:3000"`
 }
 
 route {
