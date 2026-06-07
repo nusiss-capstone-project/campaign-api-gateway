@@ -4,6 +4,9 @@
 # Match campaign-center-api requests.
 @api_path path /campaign-center-api /campaign-center-api/*
 
+# Match identity-ms requests.
+@identity_ms_path path /identity-ms /identity-ms/*
+
 # Match allowed browser origins for CORS.
 @allowed_origin {
 	expression `{http.request.header.Origin} == "https://campaign-center-admin-web.vercel.app" || {http.request.header.Origin} == "https://finverse-web.vercel.app" || {http.request.header.Origin} == "http://localhost:3000"`
@@ -34,6 +37,20 @@ route {
 		# Reverse proxy to the internal Railway service, preserving request path.
 		reverse_proxy http://campaign-center-api.railway.internal:8080 {
 			# The gateway owns CORS; strip upstream CORS headers to avoid browser-rejected duplicates.
+			header_down -Access-Control-Allow-Origin
+			header_down -Access-Control-Allow-Methods
+			header_down -Access-Control-Allow-Headers
+			header_down -Access-Control-Allow-Credentials
+			header_down -Access-Control-Expose-Headers
+			header_down -Access-Control-Max-Age
+			header_down -Vary
+		}
+	}
+
+	# Handle API gateway traffic for identity-ms.
+	# Using `handle` (not `handle_path`) keeps the full path prefix when proxying.
+	handle @identity_ms_path {
+		reverse_proxy http://identity-mservice.railway.internal:8080 {
 			header_down -Access-Control-Allow-Origin
 			header_down -Access-Control-Allow-Methods
 			header_down -Access-Control-Allow-Headers
